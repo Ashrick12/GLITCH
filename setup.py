@@ -22,7 +22,8 @@ setup(
         "jinja2",
         "glitch-python-hcl2",
         "dockerfile-parse==2.0.0",
-        "bashlex==0.18"
+        "bashlex==0.18",
+        "pygls==1.0.2"
         ],
     entry_points={
         "console_scripts": [

@@ -1,4 +1,7 @@
-import click, os, sys
+import click
+import os
+import sys
+from click_default_group import DefaultGroup
 from glitch.analysis.rules import Error, RuleVisitor
 from glitch.helpers import RulesListOption
 from glitch.parsers.docker_parser import DockerParser
@@ -7,6 +10,7 @@ from glitch.stats.stats import FileStats
 from glitch.tech import Tech
 from glitch.repr.inter import UnitBlockType
 from glitch.parsers.cmof import AnsibleParser, ChefParser, PuppetParser, TerraformParser
+from glitch.server import language_server
 from pkg_resources import resource_filename
 from alive_progress import alive_bar
 from pathlib import Path
@@ -23,7 +27,11 @@ def parse_and_check(type, path, module, parser, analyses, errors, stats):
             errors += analysis.check(inter)
     stats.compute(inter)
 
-@click.command(
+@click.group(cls=DefaultGroup, default='run', default_if_no_args=True)
+def cli():
+    pass
+
+@cli.command(
     help="PATH is the file or folder to analyze. OUTPUT is an optional file to which we can redirect the smells output."
 )
 @click.option('--tech',
@@ -54,7 +62,7 @@ def parse_and_check(type, path, module, parser, analyses, errors, stats):
     help="The type of smells being analyzed.")
 @click.argument('path', type=click.Path(exists=True), required=True)
 @click.argument('output', type=click.Path(), required=False)
-def glitch(tech, type, path, config, module, csv, 
+def run(tech, type, path, config, module, csv, 
         dataset, includeall, smells, output, tableformat, linter):
     if config != "configs/default.ini" and not os.path.exists(config):
         raise click.BadOptionUsage('config', f"Invalid value for 'config': Path '{config}' does not exist.")
@@ -141,7 +149,11 @@ def glitch(tech, type, path, config, module, csv,
     if not linter:
         print_stats(errors, smells, file_stats, tableformat)
 
+@cli.command()
+def server():
+    language_server.start_tcp('127.0.0.1', 8080)
+
 def main():
-    glitch(prog_name='glitch')
+    cli(prog_name='glitch')
 
 main()

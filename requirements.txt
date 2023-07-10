@@ -11,3 +11,5 @@ jinja2
 glitch-python-hcl2
 dockerfile-parse==2.0.0
 bashlex==0.18
+click-default-group==1.2.2
+pygls==1.0.2
